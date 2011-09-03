@@ -1,4 +1,5 @@
 package gy.sog.Juggler;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
