@@ -1,6 +1,7 @@
 package gy.sog.Juggler;
 
 import java.lang.Exception;
+import java.net.*;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -47,6 +48,23 @@ public class Juggler extends Activity implements SensorListener
             return;
         }
 
-        outView.setText(String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]", sensor, values[0], values[1], values[2]));
+	String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
+        outView.setText(data);
+	sendAccelData("192.168.1.113", 12345, data);
+    }
+
+    public void sendAccelData(String server, int port, String msgStr) {
+	try {
+	    DatagramSocket s = new DatagramSocket();
+	    InetAddress local = InetAddress.getByName(server);
+	    int msg_length=msgStr.length();
+	    byte[] message = msgStr.getBytes();
+	    DatagramPacket p = new DatagramPacket(message, msg_length,local,port);
+	    s.send(p);
+	} catch (SocketException e) {
+	    // arg!
+	} catch (UnknownHostException e) {
+	} catch (java.io.IOException e) {
+	}
     }
 }
