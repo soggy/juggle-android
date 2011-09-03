@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
-import gy.sog.Juggler.Bluetooth;
+import gy.sog.Juggler.BluetoothServer;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 
@@ -43,13 +43,14 @@ public class Juggler extends Activity implements SensorListener
         startActivityForResult(new Intent(enableBT), 0);
 
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
+        Intent intent = new Intent(this, BluetoothServer.class);
+        startActivity(intent);
+       // int DISCOVERY_REQUEST = 1;
 
-        int DISCOVERY_REQUEST = 1;
-
-        BluetoothAdapter b;
-        b=BluetoothAdapter.getDefaultAdapter();
-        String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
-        startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
+       // BluetoothAdapter b;
+       // b=BluetoothAdapter.getDefaultAdapter();
+       // String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
+       // startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
