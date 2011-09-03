@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
+import gy.sog.Juggler.Bluetooth;
 
 import android.widget.TextView;
 
@@ -32,6 +33,9 @@ public class Juggler extends Activity implements SensorListener
         }
 
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
+        Bluetooth b = new Bluetooth();
+        b.startServer();
+       
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
