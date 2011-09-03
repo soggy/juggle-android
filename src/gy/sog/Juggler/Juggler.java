@@ -41,8 +41,6 @@ public class Juggler extends Activity implements SensorListener
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
         Intent intent = new Intent(this, BluetoothServer.class);
         startActivity(intent);
-
-
        // int DISCOVERY_REQUEST = 1;
 
        // BluetoothAdapter b;
@@ -73,15 +71,17 @@ public class Juggler extends Activity implements SensorListener
     public void sendAccelData(String server, int port, String msgStr) {
 	try {
 	    DatagramSocket s = new DatagramSocket();
-	    InetAddress local = InetAddress.getByName(server);
+	    InetAddress saddr = InetAddress.getByName(server);
 	    int msg_length=msgStr.length();
 	    byte[] message = msgStr.getBytes();
-	    DatagramPacket p = new DatagramPacket(message, msg_length,local,port);
+	    DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
 	    s.send(p);
 	} catch (SocketException e) {
-	    // arg!
+	    Log.d("sendAccelData", "SocketException: " + e);
 	} catch (UnknownHostException e) {
+	    Log.d("sendAccelData", "HostException: " + e);
 	} catch (java.io.IOException e) {
+	    Log.d("sendAccelData", "IOException: " + e);
 	}
     }
 }
