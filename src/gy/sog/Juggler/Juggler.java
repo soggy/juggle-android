@@ -15,6 +15,10 @@ import android.content.Intent;
 
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Juggler extends Activity implements SensorListener
 {
     private TextView outView;
@@ -61,13 +65,35 @@ public class Juggler extends Activity implements SensorListener
         if (sensor != SensorManager.SENSOR_ACCELEROMETER) {
             return;
         }
-
-	String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
-        outView.setText(data);
-	sendAccelData("192.168.1.113", 12345, data);
+        try {
+	       JSONObject jEvent = new JSONObject();
+	       JSONObject jData = new JSONObject();
+	       jData.put("hand", "right");
+	       jData.put("x", values[0]);
+	       jData.put("y", values[1]);
+	       jData.put("z", values[2]);
+           jEvent.put("type", "sensor_data");
+           jEvent.put("data", jData);
+		
+	   
+	       String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
+           outView.setText(data);
+	       sendAccelData("192.168.1.129", 12345, jEvent.toString());
+		} catch (JSONException e) {
+	        Log.d("sendAccelData", "JSONException: " + e);
+	    }
     }
 
+	
+	
+	
+	
+	
+	
     public void sendAccelData(String server, int port, String msgStr) {
+       
+       
+
 	try {
 	    DatagramSocket s = new DatagramSocket();
 	    InetAddress saddr = InetAddress.getByName(server);
