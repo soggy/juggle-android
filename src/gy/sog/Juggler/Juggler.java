@@ -35,6 +35,9 @@ public class Juggler extends Activity implements SensorListener
     private TextView outView;
     private Button btButton;
     private PopupWindow pw;
+    private String server_address;
+    private String server_port;
+    public static final String PREFS_NAME = "JugglerSettings";
 
     public void btClient(View button) {
         String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
@@ -72,6 +75,11 @@ public class Juggler extends Activity implements SensorListener
         }
 
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
+        
+        // Restore preferences
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        server_address = settings.getString("server_address");
+        server_port = settings.getString("server_port");
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
@@ -147,12 +155,33 @@ public class Juggler extends Activity implements SensorListener
     }
     
     public void serverConnect(View button){
-    	//Foo
+
+    	server_address_input=findViewById(R.id.server_ip_text);
+    	server_port_input=findViewById(R.id.server_port_text);
+
+    	server_address=server_address_input;
+    	server_port=server_port_input;
+    	pw.dismiss();
     }
     
     public void serverBack(View button){	
     	//Bar
     	pw.dismiss();
+    }
+    
+    @Override
+    protected void onStop(){
+       super.onStop();
+
+      // We need an Editor object to make preference changes.
+      // All objects are from android.context.Context
+      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+      SharedPreferences.Editor editor = settings.edit();
+      editor.putString("server_address", server_address);
+      editor.putString("server_port", server_port);
+
+      // Commit the edits!
+      editor.commit();
     }
     
 }
