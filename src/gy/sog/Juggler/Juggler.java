@@ -31,6 +31,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.SharedPreferences;
+
 public class Juggler extends Activity implements SensorListener
 {
     private TextView outView;
@@ -84,8 +86,8 @@ public class Juggler extends Activity implements SensorListener
         
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        server_address = settings.getString("server_address");
-        server_port = settings.getString("server_port");
+        server_address = settings.getString("server_address", "");
+        server_port = settings.getString("server_port", "");
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
@@ -157,8 +159,8 @@ public class Juggler extends Activity implements SensorListener
     
     public void serverConnect(View button){
 
-    	server_address_input=findViewById(R.id.server_ip_text);
-    	server_port_input=findViewById(R.id.server_port_text);
+    	String server_address_input=findViewById(R.id.server_ip_text).toString();
+    	String server_port_input=findViewById(R.id.server_port_text).toString();
 
     	server_address=server_address_input;
     	server_port=server_port_input;
