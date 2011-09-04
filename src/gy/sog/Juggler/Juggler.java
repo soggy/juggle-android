@@ -79,10 +79,16 @@ public class Juggler extends Activity implements SensorListener
         outView = (TextView)findViewById(R.id.output);
 
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_UI);
+        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_NORMAL);
 
         if (! accelSupported) {
-            throw new Error("AARRGH");
+            throw new Error("AARRGH (no accelerometer)");
+        }
+
+        boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_NORMAL);
+
+        if (! orientSupported) {
+            throw new Error("AARRGH (no orientation sensor)");
         }
 
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
@@ -94,86 +100,111 @@ public class Juggler extends Activity implements SensorListener
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
-        outView.setText(String.format("onAccuracyChanged: sensor: %d, accuracy: %d", sensor, accuracy));
+        // outView.setText(String.format("onAccuracyChanged: sensor: %d, accuracy: %d", sensor, accuracy));
     }
 
   
+    private float[] last_orientation_data = null;
+
     public void onSensorChanged(int sensor, float[] values) {
-        // All values are in SI units (m/s^2) and measure contact forces.
-        // values[0]: force applied by the device on the x-axis
-        // values[1]: force applied by the device on the y-axis
-        // values[2]: force applied by the device on the z-axis
-        if (sensor != SensorManager.SENSOR_ACCELEROMETER) {
-            return;
+        if (last_orientation_data == null) {
+            last_orientation_data = new float[3];
+            last_orientation_data[0] = 0.0f;
+            last_orientation_data[1] = 0.0f;
+            last_orientation_data[2] = 0.0f;
         }
-        try {
-	       JSONObject jEvent = new JSONObject();
-	       JSONObject jData = new JSONObject();
-	       jData.put("hand", "right");
-	       jData.put("x", values[0]);
-	       jData.put("y", values[1]);
-	       jData.put("z", values[2]);
-           jEvent.put("type", "sensor_data");
-           jEvent.put("data", jData);
-		
-	   
-	       String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
-           outView.setText(data);
-	       sendAccelData("192.168.1.129", 12345, jEvent.toString());
-		} catch (JSONException e) {
-	        Log.d("sendAccelData", "JSONException: " + e);
-	    }
+
+        switch (sensor) {
+        case SensorManager.SENSOR_ACCELEROMETER: {
+            // All values are in SI units (m/s^2) and measure contact forces.
+            // values[0]: force applied by the device on the x-axis
+            // values[1]: force applied by the device on the y-axis
+            // values[2]: force applied by the device on the z-axis
+            try {
+                JSONObject jEvent = new JSONObject();
+                JSONObject jData = new JSONObject();
+                jData.put("hand", "right");
+                jData.put("x", values[0]);
+                jData.put("y", values[1]);
+                jData.put("z", values[2]);
+                jData.put("azimuth", last_orientation_data[0]);
+                jData.put("pitch", last_orientation_data[1]);
+                jData.put("roll", last_orientation_data[2]);
+                jEvent.put("type", "sensor_data");
+                jEvent.put("data", jData);
+
+                String data = jEvent.toString();
+                outView.setText(data);
+       
+                sendAccelData("192.168.1.129", 12345, data);
+            } catch (JSONException e) {
+                Log.d("sendAccelData", "JSONException: " + e);
+            }
+            break;
+        }
+        case SensorManager.SENSOR_ORIENTATION: {
+            // All values are angles in degrees.
+            // values[0]: Azimuth, rotation around the Z axis (0<=azimuth<360). 0 = North, 90 = East, 180 = South, 270 = West
+            // values[1]: Pitch, rotation around X axis (-180<=pitch<=180), with positive values when the z-axis moves toward the y-axis.
+            // values[2]: Roll, rotation around Y axis (-90<=roll<=90), with positive values when the z-axis moves toward the x-axis.
+            last_orientation_data[0] = values[0];
+            last_orientation_data[1] = values[1];
+            last_orientation_data[2] = values[2];
+            break;
+        }
+        default: break;
+        }
     }
 
 
     public void sendAccelData(String server, int port, String msgStr) {
-	try {
-	    DatagramSocket s = new DatagramSocket();
-	    InetAddress saddr = InetAddress.getByName(server);
-	    int msg_length=msgStr.length();
-	    byte[] message = msgStr.getBytes();
-	    DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
-	    s.send(p);
-	} catch (SocketException e) {
-	    Log.d("sendAccelData", "SocketException: " + e);
-	} catch (UnknownHostException e) {
-	    Log.d("sendAccelData", "HostException: " + e);
-	} catch (java.io.IOException e) {
-	    Log.d("sendAccelData", "IOException: " + e);
-	}
+    try {
+        DatagramSocket s = new DatagramSocket();
+        InetAddress saddr = InetAddress.getByName(server);
+        int msg_length=msgStr.length();
+        byte[] message = msgStr.getBytes();
+        DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
+        s.send(p);
+    } catch (SocketException e) {
+        Log.d("sendAccelData", "SocketException: " + e);
+    } catch (UnknownHostException e) {
+        Log.d("sendAccelData", "HostException: " + e);
+    } catch (java.io.IOException e) {
+        Log.d("sendAccelData", "IOException: " + e);
+    }
     }
     
     //Called when "enter server IP address" button is clicked
     public void findServer(View button){
-    	setContentView(R.layout.server_input);
-    	//Server IP
-    	server_address_input=(EditText) findViewById(R.id.server_ip_text);
-    	server_address_input.setText(server_address);
-    	
-    	//Server port
-    	server_port_input=(EditText) findViewById(R.id.server_port_text);
-    	server_port_input.setText(server_port);
-    	
+        setContentView(R.layout.server_input);
+        //Server IP
+        server_address_input=(EditText) findViewById(R.id.server_ip_text);
+        server_address_input.setText(server_address);
+        
+        //Server port
+        server_port_input=(EditText) findViewById(R.id.server_port_text);
+        server_port_input.setText(server_port);
+        
     }
     
     public void serverConnect(View button){
 
-    	server_address=server_address_input.getText().toString();
-    	server_port=server_port_input.getText().toString();
-    	server_address_input.setInputType(0);
-    	server_port_input.setInputType(0);
-    	InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    	imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
-    	setContentView(R.layout.main);
+        server_address=server_address_input.getText().toString();
+        server_port=server_port_input.getText().toString();
+        server_address_input.setInputType(0);
+        server_port_input.setInputType(0);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
+        setContentView(R.layout.main);
     }
     
-    public void serverBack(View button){	
-    	//Bar
-    	server_address_input.setInputType(0);
-    	server_port_input.setInputType(0);
-    	InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    	imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
-    	setContentView(R.layout.main);
+    public void serverBack(View button){    
+        //Bar
+        server_address_input.setInputType(0);
+        server_port_input.setInputType(0);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
+        setContentView(R.layout.main);
     }
     
     @Override
