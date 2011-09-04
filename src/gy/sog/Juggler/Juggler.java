@@ -1,6 +1,7 @@
 package gy.sog.Juggler;
 
 import java.lang.Exception;
+import java.net.*;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,11 +14,19 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
+import gy.sog.Juggler.BluetoothServer;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+
 
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Juggler extends Activity implements SensorListener
 {
@@ -46,7 +55,18 @@ public class Juggler extends Activity implements SensorListener
             throw new Error("AARRGH");
         }
 
+        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+        startActivityForResult(new Intent(enableBT), 0);
+
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
+        Intent intent = new Intent(this, BluetoothServer.class);
+        startActivity(intent);
+       // int DISCOVERY_REQUEST = 1;
+
+       // BluetoothAdapter b;
+       // b=BluetoothAdapter.getDefaultAdapter();
+       // String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
+       // startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
@@ -62,8 +82,49 @@ public class Juggler extends Activity implements SensorListener
         if (sensor != SensorManager.SENSOR_ACCELEROMETER) {
             return;
         }
+        try {
+	       JSONObject jEvent = new JSONObject();
+	       JSONObject jData = new JSONObject();
+	       jData.put("hand", "right");
+	       jData.put("x", values[0]);
+	       jData.put("y", values[1]);
+	       jData.put("z", values[2]);
+           jEvent.put("type", "sensor_data");
+           jEvent.put("data", jData);
+		
+	   
+	       String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
+           outView.setText(data);
+	       sendAccelData("192.168.1.129", 12345, jEvent.toString());
+		} catch (JSONException e) {
+	        Log.d("sendAccelData", "JSONException: " + e);
+	    }
+    }
 
-        outView.setText(String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]", sensor, values[0], values[1], values[2]));
+	
+	
+	
+	
+	
+	
+    public void sendAccelData(String server, int port, String msgStr) {
+       
+       
+
+	try {
+	    DatagramSocket s = new DatagramSocket();
+	    InetAddress saddr = InetAddress.getByName(server);
+	    int msg_length=msgStr.length();
+	    byte[] message = msgStr.getBytes();
+	    DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
+	    s.send(p);
+	} catch (SocketException e) {
+	    Log.d("sendAccelData", "SocketException: " + e);
+	} catch (UnknownHostException e) {
+	    Log.d("sendAccelData", "HostException: " + e);
+	} catch (java.io.IOException e) {
+	    Log.d("sendAccelData", "IOException: " + e);
+	}
     }
     
     public void identifyPair(View button){
