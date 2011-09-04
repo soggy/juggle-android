@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import java.util.Set;
 import java.io.IOException;
+import java.io.OutputStream;
 
 
 
@@ -46,10 +47,17 @@ public class BluetoothClient extends Activity {
                             if (paired.contains(remote)) {
                                 try {
                                     bts = remote.createRfcommSocketToServiceRecord(BluetoothShared.juggleUUID);
+
+                                    outView.setText("made a bluetooth connection");
+                                    // successful connection to a right-hand juggle app.
+                                    OutputStream s = bts.getOutputStream();
+                                    s.write("hello world".getBytes());
                                 } catch (IOException e) {
                                     // no problem.
+                                    outView.setText(String.format("can't connect to %s", r));
                                 }
                             } else {
+                                // this is a discovered but not paired device. Build a list of them...
                                 outView.setText(String.format("onReceive: %s", r));
                             }
                         }
