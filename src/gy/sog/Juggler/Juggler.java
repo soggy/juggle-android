@@ -12,6 +12,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
@@ -40,6 +41,8 @@ public class Juggler extends Activity implements SensorListener
     private PopupWindow pw;
     private String server_address;
     private String server_port;
+    private EditText server_address_input;
+    private EditText server_port_input;
     public static final String PREFS_NAME = "JugglerSettings";
 
     public static boolean is_emulating() {
@@ -86,8 +89,8 @@ public class Juggler extends Activity implements SensorListener
         
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        server_address = settings.getString("server_address", "");
-        server_port = settings.getString("server_port", "");
+        server_address = settings.getString("server_address", "Enter IP Address...");
+        server_port = settings.getString("server_port", "Enter Port...");
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
@@ -140,36 +143,37 @@ public class Juggler extends Activity implements SensorListener
 	}
     }
     
+    //Called when "enter server IP address" button is clicked
     public void findServer(View button){
+    	setContentView(R.layout.server_input);
+    	//Server IP
+    	server_address_input=(EditText) findViewById(R.id.server_ip_text);
+    	server_address_input.setText(server_address);
     	
-    	Display display = getWindowManager().getDefaultDisplay(); 
-    	int display_width = display.getWidth();
-    	int display_height = display.getHeight();
-    	//this is the code for popup window
-
-    	LayoutInflater inflater = (LayoutInflater) Juggler.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    	//Here x is the name of the xml which contains the popup components
-    	pw = new PopupWindow(inflater.inflate(R.layout.server_input,null, false),display_width,display_height,true);
-    	//Here y is the id of the root component
-
-    	//pw.showAtLocation(findViewById(R.id.main), Gravity.CENTER, 0,0);
-    	pw.showAsDropDown(findViewById(R.id.find_server));
+    	//Server port
+    	server_port_input=(EditText) findViewById(R.id.server_port_text);
+    	server_port_input.setText(server_port);
     	
     }
     
     public void serverConnect(View button){
 
-    	String server_address_input=findViewById(R.id.server_ip_text).toString();
-    	String server_port_input=findViewById(R.id.server_port_text).toString();
-
-    	server_address=server_address_input;
-    	server_port=server_port_input;
-    	pw.dismiss();
+    	server_address=server_address_input.getText().toString();
+    	server_port=server_port_input.getText().toString();
+    	server_address_input.setInputType(0);
+    	server_port_input.setInputType(0);
+    	InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    	imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
+    	setContentView(R.layout.main);
     }
     
     public void serverBack(View button){	
     	//Bar
-    	pw.dismiss();
+    	server_address_input.setInputType(0);
+    	server_port_input.setInputType(0);
+    	InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    	imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
+    	setContentView(R.layout.main);
     }
     
     @Override

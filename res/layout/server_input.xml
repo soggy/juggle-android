@@ -11,20 +11,23 @@
 <TableLayout  
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:paddingTop="50px">
+	android:paddingTop="50px"
+	android:weightSum="1.0">
 	<TableRow>
 	<EditText
 		android:id="@+id/server_ip_text"
 		android:singleLine="true"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="Enter IP Address..." />
+		android:text=""
+		android:layout_weight=".50" />
 	<EditText
 		android:id="@+id/server_port_text"
 		android:singleLine="true"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="Enter Port..." />
+		android:text=""
+		android:layout_weight=".50" />
 	</TableRow>
 	<TableRow>
 	<Button
