@@ -11,36 +11,52 @@
 <TableLayout  
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:paddingTop="50px">
+	android:paddingTop="50px"
+	android:weightSum="1.0">
 	<TableRow>
 	<EditText
-		android:singleLine="true"
-		android:layout_width="fill_parent"
 		android:id="@+id/server_ip_text"
-		android:layout_height="wrap_content"
-		android:text="Enter IP Address..." />
-	<EditText
 		android:singleLine="true"
 		android:layout_width="fill_parent"
-		android:id="@+id/server_port_text"
 		android:layout_height="wrap_content"
-		android:text="Enter Port..." />
+		android:text=""
+		android:layout_weight=".50" />
+	<EditText
+		android:id="@+id/server_port_text"
+		android:singleLine="true"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text=""
+		android:layout_weight=".50" />
 	</TableRow>
 	<TableRow>
 	<Button
 		android:id="@+id/server_connect_button"
 		android:text="Connect!"
 		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:onClick="serverConnect"
 		android:layout_weight=".50"/>
 	<Button
 		android:id="@+id/server_back_button"
 		android:text="Back"
 		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:onClick="serverBack"
 		android:layout_weight=".50"/>
+	</TableRow>
+	<TableRow>
+	<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="My IP:"
+    />
+<TextView  
+    android:id="@+id/my_ip_address"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text=""
+    />
 	</TableRow>
 </TableLayout>
 </LinearLayout>
