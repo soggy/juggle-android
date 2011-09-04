@@ -11,12 +11,6 @@
     android:text="Hello World, Juggler"
     />
 <Button
-    android:id="@+id/btbutton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Start Bluetooth"
-/>    
-<Button
 	android:id="@+id/find_server"
 	android:layout_height="wrap_content"
 	android:layout_width="fill_parent"
@@ -32,14 +26,14 @@
 		android:text="Left Hand"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:onClick="identifyPair"
+		android:onClick="btClient"
 		android:layout_weight=".50"/>
 	<Button
 		android:id="@+id/right_hand"
 		android:text="Right Hand"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:onClick="identifyPair"
+		android:onClick="btServer"
 		android:layout_weight=".50"/>
 	</TableRow>
 </TableLayout>

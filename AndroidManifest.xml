@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name="BluetoothServer">
-        
+        </activity>
+        <activity android:name="BluetoothClient">
         </activity>
     </application>
 </manifest> 

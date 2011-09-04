@@ -30,35 +30,26 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Juggler extends Activity implements SensorListener, View.OnClickListener
+public class Juggler extends Activity implements SensorListener
 {
     private TextView outView;
     private Button btButton;
-    private boolean btStarted;
     private PopupWindow pw;
 
-    @Override
-    public void onClick(View v) {
-	if (btStarted) {
-	    Log.d("Juggler", "already started bluetooth, ignoring click");
-	    return;
-	}
-
-	// Perform action on click
-
+    public void btClient(View button) {
         String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
         startActivityForResult(new Intent(enableBT), 0);
 
-	Intent intent = new Intent(this, BluetoothServer.class);
-	startActivity(intent);
+        Intent intent = new Intent(this, BluetoothClient.class);
+        startActivity(intent);
+    }
 
-	// old style attempt?
-	// int DISCOVERY_REQUEST = 1;
-	
-	// BluetoothAdapter b;
-	// b=BluetoothAdapter.getDefaultAdapter();
-	// String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
-	// startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
+    public void btServer(View button) {
+        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+        startActivityForResult(new Intent(enableBT), 0);
+
+        Intent intent = new Intent(this, BluetoothServer.class);
+        startActivity(intent);
     }
 
     /** Called when the activity is first created. */
@@ -71,16 +62,7 @@ public class Juggler extends Activity implements SensorListener, View.OnClickLis
         Button left_button = (Button) findViewById(R.id.left_hand);
         Button right_button = (Button) findViewById(R.id.right_hand);
         
-        left_button.setEnabled(false);
-        right_button.setEnabled(false);
-
-	btStarted = false;
-
         outView = (TextView) findViewById(R.id.output);
-
-	// only start bluetooth stuff if you click the button
-	btButton = (Button) findViewById(R.id.btbutton);
-	btButton.setOnClickListener(this);
 
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
         boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_UI);
@@ -163,14 +145,6 @@ public class Juggler extends Activity implements SensorListener, View.OnClickLis
     	pw.showAsDropDown(findViewById(R.id.find_server));
     	
     }
-    
-//    EditText serverTextBox = (EditText) findViewById(R.id.server_ip_text);
-//    serverTextBox.setOnClickListener(new View.OnClickListener() {
-//        public void onClick(View v) {
-//            //Foo
-//        }
-//
-//    }
     
     public void serverConnect(View button){
     	//Foo
