@@ -35,6 +35,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 
 public class Juggler extends Activity implements SensorListener
 {
@@ -46,7 +48,7 @@ public class Juggler extends Activity implements SensorListener
     private EditText server_address_input;
     private EditText server_port_input;
     public static final String PREFS_NAME = "JugglerSettings";
-    private Dialog mSplashDialog;
+    protected Dialog mSplashDialog;
 
     public static boolean is_emulating() {
         return "sdk".equals(Build.PRODUCT);
@@ -78,8 +80,21 @@ public class Juggler extends Activity implements SensorListener
     {
         super.onCreate(savedInstanceState);
 
-        showSplashScreen();
-        setContentView(R.layout.main);
+        MyStateSaver data = (MyStateSaver) getLastNonConfigurationInstance();
+        if (data != null) {
+            // Show splash screen if still loading
+            if (data.showSplashScreen) {
+                showSplashScreen();
+            }
+            setContentView(R.layout.main);        
+     
+            // Rebuild your UI with your saved state here
+        } else {
+            showSplashScreen();
+            setContentView(R.layout.main);
+            // Do your heavy loading here on a background thread
+        }
+        //setContentView(R.layout.main);
         
         outView = (TextView)findViewById(R.id.output);
 
@@ -104,11 +119,23 @@ public class Juggler extends Activity implements SensorListener
         server_port = settings.getString("server_port", "Enter Port...");
     }
     
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        MyStateSaver data = new MyStateSaver();
+        // Save your important data here
+     
+        if (mSplashDialog != null) {
+            data.showSplashScreen = true;
+            removeSplashScreen();
+        }
+        return data;
+    }
+    
      
     /**
      * Removes the Dialog that displays the splash screen
      */
-    private void removeSplashScreen() {
+    protected void removeSplashScreen() {
         if (mSplashDialog != null) {
             mSplashDialog.dismiss();
             mSplashDialog = null;
@@ -118,8 +145,7 @@ public class Juggler extends Activity implements SensorListener
     /**
      * Shows the splash screen over the full Activity
      */
-    private void showSplashScreen() {
-    	mSplashDialog = new Dialog(this);
+    protected void showSplashScreen() {
         mSplashDialog = new Dialog(this, R.style.SplashScreen);
         mSplashDialog.setContentView(R.layout.splashscreen);
         mSplashDialog.setCancelable(false);
@@ -135,7 +161,19 @@ public class Juggler extends Activity implements SensorListener
         }, 3000);
     }
     
+    /**
+     * Simple class for storing important data across config changes
+     */
+    private class MyStateSaver {
+        public boolean showSplashScreen = false;
+        // Your other important fields here
+    }
     
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
         // outView.setText(String.format("onAccuracyChanged: sensor: %d, accuracy: %d", sensor, accuracy));
