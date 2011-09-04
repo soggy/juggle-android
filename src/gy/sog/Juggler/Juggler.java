@@ -4,9 +4,11 @@ import java.lang.Exception;
 import java.net.*;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -44,6 +46,7 @@ public class Juggler extends Activity implements SensorListener
     private EditText server_address_input;
     private EditText server_port_input;
     public static final String PREFS_NAME = "JugglerSettings";
+    private Dialog mSplashDialog;
 
     public static boolean is_emulating() {
         return "sdk".equals(Build.PRODUCT);
@@ -74,6 +77,8 @@ public class Juggler extends Activity implements SensorListener
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        showSplashScreen();
         setContentView(R.layout.main);
         
         outView = (TextView)findViewById(R.id.output);
@@ -89,9 +94,42 @@ public class Juggler extends Activity implements SensorListener
         
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        server_address = settings.getString("server_address", "Enter IP Address...");
+        server_address = settings.getString("server_address", "192.168.1.113");
         server_port = settings.getString("server_port", "Enter Port...");
     }
+    
+     
+    /**
+     * Removes the Dialog that displays the splash screen
+     */
+    private void removeSplashScreen() {
+        if (mSplashDialog != null) {
+            mSplashDialog.dismiss();
+            mSplashDialog = null;
+        }
+    }
+     
+    /**
+     * Shows the splash screen over the full Activity
+     */
+    private void showSplashScreen() {
+    	mSplashDialog = new Dialog(this);
+        mSplashDialog = new Dialog(this, R.style.SplashScreen);
+        mSplashDialog.setContentView(R.layout.splashscreen);
+        mSplashDialog.setCancelable(false);
+        mSplashDialog.show();
+     
+        // Set Runnable to remove splash screen just in case
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+          //@Override
+          public void run() {
+            removeSplashScreen();
+          }
+        }, 3000);
+    }
+    
+    
 
     public void onAccuracyChanged(int sensor, int accuracy) {
         outView.setText(String.format("onAccuracyChanged: sensor: %d, accuracy: %d", sensor, accuracy));
@@ -119,7 +157,7 @@ public class Juggler extends Activity implements SensorListener
 	   
 	       String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
            outView.setText(data);
-	       sendAccelData("192.168.1.129", 12345, jEvent.toString());
+	       sendAccelData(server_address, 12345, jEvent.toString());
 		} catch (JSONException e) {
 	        Log.d("sendAccelData", "JSONException: " + e);
 	    }
