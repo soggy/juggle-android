@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:id="@+id/server_input"
+  android:background="#000000"
+  android:paddingTop="50px">
+    
+	<EditText android:singleLine="true" android:layout_width="fill_parent" android:id="@+id/server_ip_text" android:layout_height="wrap_content" android:text="Enter IP Address..." ></EditText>
+<TableLayout  
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:paddingTop="50px">
+
+	<TableRow>
+	<Button
+		android:id="@+id/server_connect_button"
+		android:text="Connect!"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:onClick="serverConnect"
+		android:layout_weight=".50"/>
+	<Button
+		android:id="@+id/server_back_button"
+		android:text="Back"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:onClick="serverBack"
+		android:layout_weight=".50"/>
+	</TableRow>
+</TableLayout>
+</LinearLayout>
