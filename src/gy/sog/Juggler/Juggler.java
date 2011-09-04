@@ -6,6 +6,7 @@ import java.net.*;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Build;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -39,17 +40,25 @@ public class Juggler extends Activity implements SensorListener
     private String server_port;
     public static final String PREFS_NAME = "JugglerSettings";
 
+    public static boolean is_emulating() {
+        return "sdk".equals(Build.PRODUCT);
+    }
+
     public void btClient(View button) {
-        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
-        startActivityForResult(new Intent(enableBT), 0);
+        if (! is_emulating()) {
+            String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+            startActivityForResult(new Intent(enableBT), 0);
+        }
 
         Intent intent = new Intent(this, BluetoothClient.class);
         startActivity(intent);
     }
 
     public void btServer(View button) {
-        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
-        startActivityForResult(new Intent(enableBT), 0);
+        if (! is_emulating()) {
+            String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+            startActivityForResult(new Intent(enableBT), 0);
+        }
 
         Intent intent = new Intent(this, BluetoothServer.class);
         startActivity(intent);
@@ -62,10 +71,7 @@ public class Juggler extends Activity implements SensorListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        Button left_button = (Button) findViewById(R.id.left_hand);
-        Button right_button = (Button) findViewById(R.id.right_hand);
-        
-        outView = (TextView) findViewById(R.id.output);
+        outView = (TextView)findViewById(R.id.output);
 
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
         boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_UI);
@@ -130,11 +136,6 @@ public class Juggler extends Activity implements SensorListener
 	} catch (java.io.IOException e) {
 	    Log.d("sendAccelData", "IOException: " + e);
 	}
-    }
-    
-    public void identifyPair(View button){
-    	//Add code for initializing bluetooth activity here
-    	
     }
     
     public void findServer(View button){

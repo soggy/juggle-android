@@ -9,7 +9,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 
-public class BluetoothServer extends Activity{
+public class BluetoothServer extends Activity {
 
 	private BluetoothAdapter b;
 	static final int DISCOVERY_REQUEST = 1;
@@ -17,9 +17,13 @@ public class BluetoothServer extends Activity{
 	@Override
 	public void onStart(){
 		super.onStart();
-		b=BluetoothAdapter.getDefaultAdapter();
-		String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
-		startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
+                setContentView(R.layout.juggle);
+
+		b = BluetoothAdapter.getDefaultAdapter();
+                if (b != null) {
+		    String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
+		    startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
+                }
 	}
 	
 	protected void onActivityResult(int requestCode, int resultCode, Intent data){
