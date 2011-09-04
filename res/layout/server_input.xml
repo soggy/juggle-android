@@ -7,13 +7,25 @@
   android:id="@+id/server_input"
   android:background="#000000"
   android:paddingTop="50px">
-    
-	<EditText android:singleLine="true" android:layout_width="fill_parent" android:id="@+id/server_ip_text" android:layout_height="wrap_content" android:text="Enter IP Address..." ></EditText>
+
 <TableLayout  
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:paddingTop="50px">
-
+	<TableRow>
+	<EditText
+		android:singleLine="true"
+		android:layout_width="fill_parent"
+		android:id="@+id/server_ip_text"
+		android:layout_height="wrap_content"
+		android:text="Enter IP Address..." />
+	<EditText
+		android:singleLine="true"
+		android:layout_width="fill_parent"
+		android:id="@+id/server_port_text"
+		android:layout_height="wrap_content"
+		android:text="Enter Port..." />
+	</TableRow>
 	<TableRow>
 	<Button
 		android:id="@+id/server_connect_button"

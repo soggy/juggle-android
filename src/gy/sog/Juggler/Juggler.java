@@ -6,6 +6,7 @@ import java.net.*;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Build;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -35,18 +36,29 @@ public class Juggler extends Activity implements SensorListener
     private TextView outView;
     private Button btButton;
     private PopupWindow pw;
+    private String server_address;
+    private String server_port;
+    public static final String PREFS_NAME = "JugglerSettings";
+
+    public static boolean is_emulating() {
+        return "sdk".equals(Build.PRODUCT);
+    }
 
     public void btClient(View button) {
-        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
-        startActivityForResult(new Intent(enableBT), 0);
+        if (! is_emulating()) {
+            String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+            startActivityForResult(new Intent(enableBT), 0);
+        }
 
         Intent intent = new Intent(this, BluetoothClient.class);
         startActivity(intent);
     }
 
     public void btServer(View button) {
-        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
-        startActivityForResult(new Intent(enableBT), 0);
+        if (! is_emulating()) {
+            String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+            startActivityForResult(new Intent(enableBT), 0);
+        }
 
         Intent intent = new Intent(this, BluetoothServer.class);
         startActivity(intent);
@@ -59,10 +71,7 @@ public class Juggler extends Activity implements SensorListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        Button left_button = (Button) findViewById(R.id.left_hand);
-        Button right_button = (Button) findViewById(R.id.right_hand);
-        
-        outView = (TextView) findViewById(R.id.output);
+        outView = (TextView)findViewById(R.id.output);
 
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
         boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_UI);
@@ -72,6 +81,11 @@ public class Juggler extends Activity implements SensorListener
         }
 
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
+        
+        // Restore preferences
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        server_address = settings.getString("server_address");
+        server_port = settings.getString("server_port");
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
@@ -124,11 +138,6 @@ public class Juggler extends Activity implements SensorListener
 	}
     }
     
-    public void identifyPair(View button){
-    	//Add code for initializing bluetooth activity here
-    	
-    }
-    
     public void findServer(View button){
     	
     	Display display = getWindowManager().getDefaultDisplay(); 
@@ -147,12 +156,33 @@ public class Juggler extends Activity implements SensorListener
     }
     
     public void serverConnect(View button){
-    	//Foo
+
+    	server_address_input=findViewById(R.id.server_ip_text);
+    	server_port_input=findViewById(R.id.server_port_text);
+
+    	server_address=server_address_input;
+    	server_port=server_port_input;
+    	pw.dismiss();
     }
     
     public void serverBack(View button){	
     	//Bar
     	pw.dismiss();
+    }
+    
+    @Override
+    protected void onStop(){
+       super.onStop();
+
+      // We need an Editor object to make preference changes.
+      // All objects are from android.context.Context
+      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+      SharedPreferences.Editor editor = settings.edit();
+      editor.putString("server_address", server_address);
+      editor.putString("server_port", server_port);
+
+      // Commit the edits!
+      editor.commit();
     }
     
 }
