@@ -45,5 +45,18 @@
 		android:onClick="serverBack"
 		android:layout_weight=".50"/>
 	</TableRow>
+	<TableRow>
+	<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="My IP:"
+    />
+<TextView  
+    android:id="@+id/my_ip_address"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text=""
+    />
+	</TableRow>
 </TableLayout>
 </LinearLayout>

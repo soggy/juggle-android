@@ -2,6 +2,7 @@ package gy.sog.Juggler;
 
 import java.lang.Exception;
 import java.net.*;
+import java.util.Enumeration;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -260,6 +261,9 @@ public class Juggler extends Activity implements SensorListener
         server_port_input=(EditText) findViewById(R.id.server_port_text);
         server_port_input.setText(server_port);
         
+        TextView my_ip=(TextView)findViewById(R.id.my_ip_address);
+        my_ip.setText(getLocalIpAddress());
+        
     }
     
     public void serverConnect(View button){
@@ -271,6 +275,7 @@ public class Juggler extends Activity implements SensorListener
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
         setContentView(R.layout.main);
+        outView = (TextView)findViewById(R.id.output);
     }
     
     public void serverBack(View button){    
@@ -280,6 +285,25 @@ public class Juggler extends Activity implements SensorListener
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
         setContentView(R.layout.main);
+        outView = (TextView)findViewById(R.id.output);
+    }
+    
+    public String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            //Log.e(LOG_TAG, ex.toString());
+        	//Do nothing
+        }
+        return null;
     }
     
     @Override
