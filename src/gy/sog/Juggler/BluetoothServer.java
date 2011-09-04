@@ -1,5 +1,7 @@
 package gy.sog.Juggler;
 
+import gy.sog.Juggler.BluetoothShared;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -30,7 +32,7 @@ public class BluetoothServer extends Activity {
 		if (requestCode == DISCOVERY_REQUEST && resultCode > 0){
 			BluetoothServerSocket soc = null;
 			try {
-				soc = b.listenUsingRfcommWithServiceRecord("juggler", UUID.randomUUID());
+				soc = b.listenUsingRfcommWithServiceRecord("juggler", BluetoothShared.juggleUUID);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
