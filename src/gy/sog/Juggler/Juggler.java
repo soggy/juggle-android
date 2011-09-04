@@ -4,8 +4,14 @@ import java.lang.Exception;
 import java.net.*;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import gy.sog.Juggler.BluetoothServer;
@@ -13,6 +19,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 
 
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Button;
 import android.view.View;
@@ -26,6 +35,7 @@ public class Juggler extends Activity implements SensorListener, View.OnClickLis
     private TextView outView;
     private Button btButton;
     private boolean btStarted;
+    private PopupWindow pw;
 
     @Override
     public void onClick(View v) {
@@ -57,6 +67,12 @@ public class Juggler extends Activity implements SensorListener, View.OnClickLis
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        Button left_button = (Button) findViewById(R.id.left_hand);
+        Button right_button = (Button) findViewById(R.id.right_hand);
+        
+        left_button.setEnabled(false);
+        right_button.setEnabled(false);
 
 	btStarted = false;
 
@@ -125,4 +141,44 @@ public class Juggler extends Activity implements SensorListener, View.OnClickLis
 	    Log.d("sendAccelData", "IOException: " + e);
 	}
     }
+    
+    public void identifyPair(View button){
+    	//Add code for initializing bluetooth activity here
+    	
+    }
+    
+    public void findServer(View button){
+    	
+    	Display display = getWindowManager().getDefaultDisplay(); 
+    	int display_width = display.getWidth();
+    	int display_height = display.getHeight();
+    	//this is the code for popup window
+
+    	LayoutInflater inflater = (LayoutInflater) Juggler.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    	//Here x is the name of the xml which contains the popup components
+    	pw = new PopupWindow(inflater.inflate(R.layout.server_input,null, false),display_width,display_height,true);
+    	//Here y is the id of the root component
+
+    	//pw.showAtLocation(findViewById(R.id.main), Gravity.CENTER, 0,0);
+    	pw.showAsDropDown(findViewById(R.id.find_server));
+    	
+    }
+    
+//    EditText serverTextBox = (EditText) findViewById(R.id.server_ip_text);
+//    serverTextBox.setOnClickListener(new View.OnClickListener() {
+//        public void onClick(View v) {
+//            //Foo
+//        }
+//
+//    }
+    
+    public void serverConnect(View button){
+    	//Foo
+    }
+    
+    public void serverBack(View button){	
+    	//Bar
+    	pw.dismiss();
+    }
+    
 }
