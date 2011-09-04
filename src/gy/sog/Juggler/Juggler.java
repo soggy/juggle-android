@@ -108,9 +108,9 @@ public class Juggler extends Activity implements SensorListener
 
         boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_NORMAL);
 
-        if (! orientSupported) {
-            throw new Error("AARRGH (no orientation sensor)");
-        }
+        //if (! orientSupported) {
+            //throw new Error("AARRGH (no orientation sensor)");
+        //}
 
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
         
