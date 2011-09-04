@@ -136,7 +136,7 @@ public class Juggler extends Activity implements SensorListener
                 String data = jEvent.toString();
                 outView.setText(data);
        
-                sendAccelData("192.168.1.129", 12345, data);
+                sendAccelData("192.168.1.113", 12345, data);
             } catch (JSONException e) {
                 Log.d("sendAccelData", "JSONException: " + e);
             }
