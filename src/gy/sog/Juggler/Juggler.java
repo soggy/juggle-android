@@ -78,6 +78,7 @@ public class Juggler extends Activity implements SensorListener
     {
         super.onCreate(savedInstanceState);
 
+
         showSplashScreen();
         setContentView(R.layout.main);
         
