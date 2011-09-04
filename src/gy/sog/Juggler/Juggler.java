@@ -116,7 +116,7 @@ public class Juggler extends Activity implements SensorListener
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         server_address = settings.getString("server_address", "192.168.1.113");
-        server_port = settings.getString("server_port", "Enter Port...");
+        server_port = settings.getString("server_port", "12345");
     }
     
     @Override
@@ -211,8 +211,7 @@ public class Juggler extends Activity implements SensorListener
 
                 String data = jEvent.toString();
                 outView.setText(data);
-       
-                sendAccelData("192.168.1.113", 12345, data);
+                sendAccelData(server_address, (Integer.parseInt(server_port)), data);
             } catch (JSONException e) {
                 Log.d("sendAccelData", "JSONException: " + e);
             }
@@ -243,7 +242,7 @@ public class Juggler extends Activity implements SensorListener
 	   
 	       String data = String.format("onSensorChanged: sensor: %d, [x,y,z]=[%f,%f,%f]\n", sensor, values[0], values[1], values[2]);
            outView.setText(data);
-	       sendAccelData(server_address, 12345, jEvent.toString());
+	       sendAccelData(server_address, (Integer.parseInt(server_port)), jEvent.toString());
 		} catch (JSONException e) {
 	        Log.d("sendAccelData", "JSONException: " + e);
 	    }
