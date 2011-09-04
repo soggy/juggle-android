@@ -14,14 +14,42 @@ import android.content.Intent;
 
 
 import android.widget.TextView;
+import android.widget.Button;
+import android.view.View;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Juggler extends Activity implements SensorListener
+public class Juggler extends Activity implements SensorListener, View.OnClickListener
 {
     private TextView outView;
+    private Button btButton;
+    private boolean btStarted;
+
+    @Override
+    public void onClick(View v) {
+	if (btStarted) {
+	    Log.d("Juggler", "already started bluetooth, ignoring click");
+	    return;
+	}
+
+	// Perform action on click
+
+        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
+        startActivityForResult(new Intent(enableBT), 0);
+
+	Intent intent = new Intent(this, BluetoothServer.class);
+	startActivity(intent);
+
+	// old style attempt?
+	// int DISCOVERY_REQUEST = 1;
+	
+	// BluetoothAdapter b;
+	// b=BluetoothAdapter.getDefaultAdapter();
+	// String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
+	// startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
+    }
 
     /** Called when the activity is first created. */
     @Override
@@ -30,7 +58,13 @@ public class Juggler extends Activity implements SensorListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+	btStarted = false;
+
         outView = (TextView) findViewById(R.id.output);
+
+	// only start bluetooth stuff if you click the button
+	btButton = (Button) findViewById(R.id.btbutton);
+	btButton.setOnClickListener(this);
 
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
         boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_UI);
@@ -39,18 +73,7 @@ public class Juggler extends Activity implements SensorListener
             throw new Error("AARRGH");
         }
 
-        String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;
-        startActivityForResult(new Intent(enableBT), 0);
-
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
-        Intent intent = new Intent(this, BluetoothServer.class);
-        startActivity(intent);
-       // int DISCOVERY_REQUEST = 1;
-
-       // BluetoothAdapter b;
-       // b=BluetoothAdapter.getDefaultAdapter();
-       // String aDiscoverable = BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE;
-       // startActivityForResult(new Intent(aDiscoverable), DISCOVERY_REQUEST);
     }
 
     public void onAccuracyChanged(int sensor, int accuracy) {
@@ -85,16 +108,8 @@ public class Juggler extends Activity implements SensorListener
 	    }
     }
 
-	
-	
-	
-	
-	
-	
-    public void sendAccelData(String server, int port, String msgStr) {
-       
-       
 
+    public void sendAccelData(String server, int port, String msgStr) {
 	try {
 	    DatagramSocket s = new DatagramSocket();
 	    InetAddress saddr = InetAddress.getByName(server);
