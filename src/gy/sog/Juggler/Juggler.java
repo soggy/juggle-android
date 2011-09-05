@@ -103,13 +103,13 @@ public class Juggler extends Activity implements SensorListener
         outView = (TextView)findViewById(R.id.output);
 
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_NORMAL);
+        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_FASTEST);
 
         if (! accelSupported) {
             throw new Error("AARRGH (no accelerometer)");
         }
 
-        boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_NORMAL);
+        boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_FASTEST);
 
         //if (! orientSupported) {
             //throw new Error("AARRGH (no orientation sensor)");
