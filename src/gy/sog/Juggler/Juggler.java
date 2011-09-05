@@ -290,8 +290,8 @@ public class Juggler extends Activity implements SensorListener
     	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             public void onCompletion(MediaPlayer mp) {
-            	//mp.release();
-            	//mp = null;
+            	mp.release();
+            	mp = null;
             }
         });
     	mediaPlayer.start(); // no need to call prepare(); create() does that for you
@@ -322,6 +322,11 @@ public class Juggler extends Activity implements SensorListener
         	//Do nothing
         }
         return null;
+    }
+    
+    public void pickSound(View button){
+        Intent intent = new Intent(this, SoundFXChooser.class);
+        startActivity(intent);
     }
     
     @Override

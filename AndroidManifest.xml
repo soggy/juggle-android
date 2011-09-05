@@ -21,5 +21,7 @@
         </activity>
         <activity android:name="BluetoothClient">
         </activity>
+        <activity android:name="SoundFXChooser">
+        </activity>
     </application>
 </manifest> 

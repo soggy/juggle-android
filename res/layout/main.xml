@@ -16,6 +16,13 @@
 	android:layout_width="fill_parent"
 	android:text="Input Server IP Address"
 	android:onClick="findServer" />
+<Button
+	android:id="@+id/pick_sound"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:text="Choose Sound"
+	android:onClick="pickSound"
+	android:layout_marginTop="50px" />
 <TableLayout  
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
