@@ -7,6 +7,8 @@ import java.util.Enumeration;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Handler;
@@ -50,6 +52,7 @@ public class Juggler extends Activity implements SensorListener
     private EditText server_port_input;
     public static final String PREFS_NAME = "JugglerSettings";
     protected Dialog mSplashDialog;
+    protected MediaPlayer mediaPlayer;
 
     public static boolean is_emulating() {
         return "sdk".equals(Build.PRODUCT);
@@ -279,7 +282,22 @@ public class Juggler extends Activity implements SensorListener
     }
     
     public void serverBack(View button){    
-        //Bar
+
+    	//MEDIAPLAYER TEST CODE HERE
+    	
+    	//mediaPlayer.reset();
+    	mediaPlayer = MediaPlayer.create(this, R.raw.kitten2);
+    	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            public void onCompletion(MediaPlayer mp) {
+            	//mp.release();
+            	//mp = null;
+            }
+        });
+    	mediaPlayer.start(); // no need to call prepare(); create() does that for you
+
+    	
+    	//END TEST CODE
         server_address_input.setInputType(0);
         server_port_input.setInputType(0);
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
