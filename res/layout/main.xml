@@ -43,6 +43,22 @@
 		android:onClick="btServer"
 		android:layout_weight=".50"/>
 	</TableRow>
+	<TableRow>
+	  <Button
+	      android:id="@+id/throw_button"
+	      android:text="Throw"
+	      android:layout_height="wrap_content"
+	      android:layout_width="fill_parent"
+	      android:onClick="doThrow"
+	      android:layout_weight=".50"/>
+	  <Button
+	      android:id="@+id/catch_button"
+	      android:text="Catch"
+	      android:layout_height="wrap_content"
+	      android:layout_width="fill_parent"
+	      android:onClick="doCatch"
+	      android:layout_weight=".50"/>
+	</TableRow>
 </TableLayout>
 </LinearLayout>
 

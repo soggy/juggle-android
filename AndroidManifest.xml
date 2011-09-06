@@ -23,5 +23,6 @@
         </activity>
         <activity android:name="SoundFXChooser">
         </activity>
+	<service android:enabled="true" android:name=".JugglerService"/>
     </application>
 </manifest> 

@@ -41,8 +41,12 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 
+import gy.sog.Juggler.JugglerService;
+
 public class Juggler extends Activity implements SensorListener
 {
+    private final static String TAG = "Juggler";
+
     private TextView outView;
     private Button btButton;
     private PopupWindow pw;
@@ -78,6 +82,52 @@ public class Juggler extends Activity implements SensorListener
         startActivity(intent);
     }
 
+    public void doThrow(View button) {
+	Log.d(TAG, "doThrow");
+    	mediaPlayer = MediaPlayer.create(this, R.raw.throw_ball);
+    	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            public void onCompletion(MediaPlayer mp) {
+            	mp.release();
+            	mp = null;
+            }
+        });
+    	mediaPlayer.start(); // no need to call prepare(); create() does that for you
+    }
+    
+    public void doCatch(View button) {
+	Log.d(TAG, "doCatch");
+    	mediaPlayer = MediaPlayer.create(this, R.raw.catch_ball1);
+    	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            public void onCompletion(MediaPlayer mp) {
+            	mp.release();
+            	mp = null;
+            }
+        });
+    	mediaPlayer.start(); // no need to call prepare(); create() does that for you
+    }
+
+    private void registerSensorListeners() {
+        SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
+        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_FASTEST);
+
+        if (! accelSupported) {
+            throw new Error("AARRGH (no accelerometer)");
+        }
+
+        boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_FASTEST);
+
+        //if (! orientSupported) {
+            //throw new Error("AARRGH (no orientation sensor)");
+        //}
+    }
+
+    private void unregisterSensorListeners() {
+        SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
+	sensorMgr.unregisterListener(this);
+    }
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -101,20 +151,6 @@ public class Juggler extends Activity implements SensorListener
         //setContentView(R.layout.main);
         
         outView = (TextView)findViewById(R.id.output);
-
-        SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_FASTEST);
-
-        if (! accelSupported) {
-            throw new Error("AARRGH (no accelerometer)");
-        }
-
-        boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_FASTEST);
-
-        //if (! orientSupported) {
-            //throw new Error("AARRGH (no orientation sensor)");
-        //}
-
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
         
         // Restore preferences
@@ -123,6 +159,33 @@ public class Juggler extends Activity implements SensorListener
         server_port = settings.getString("server_port", "12345");
     }
     
+    @Override
+    protected void onStart() {
+	Log.d(TAG, "onStart");
+	startService(new Intent(this, JugglerService.class));
+	super.onStart();
+	registerSensorListeners();
+    }
+
+    @Override
+    protected void onStop() {
+	Log.d(TAG, "onStop");
+	stopService(new Intent(this, JugglerService.class));
+
+	super.onStop();
+	unregisterSensorListeners();
+
+      // We need an Editor object to make preference changes.
+      // All objects are from android.context.Context
+      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+      SharedPreferences.Editor editor = settings.edit();
+      editor.putString("server_address", server_address);
+      editor.putString("server_port", server_port);
+
+      // Commit the edits!
+      editor.commit();
+    }
+
     @Override
     public Object onRetainNonConfigurationInstance() {
         MyStateSaver data = new MyStateSaver();
@@ -327,21 +390,5 @@ public class Juggler extends Activity implements SensorListener
     public void pickSound(View button){
         Intent intent = new Intent(this, SoundFXChooser.class);
         startActivity(intent);
-    }
-    
-    @Override
-    protected void onStop(){
-       super.onStop();
-
-      // We need an Editor object to make preference changes.
-      // All objects are from android.context.Context
-      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-      SharedPreferences.Editor editor = settings.edit();
-      editor.putString("server_address", server_address);
-      editor.putString("server_port", server_port);
-
-      // Commit the edits!
-      editor.commit();
-    }
-    
+    }    
 }
