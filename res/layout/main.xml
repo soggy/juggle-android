@@ -10,6 +10,12 @@
     android:layout_height="wrap_content" 
     android:text="Hello World, Juggler"
     />
+<SurfaceView
+   android:id="@+id/surface_view"
+   android:layout_width="fill_parent"
+   android:layout_height="wrap_content"
+   android:text="SurfaceView"
+   />
 <Button
 	android:id="@+id/find_server"
 	android:layout_height="wrap_content"

@@ -6,25 +6,33 @@ import java.util.Enumeration;
 
 import android.app.Activity;
 import android.app.Dialog;
+
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
+
 import android.media.MediaPlayer;
 import android.net.Uri;
+
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
+
 import android.util.Log;
+
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.SurfaceView;
+
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
-import gy.sog.Juggler.BluetoothServer;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-
 
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +49,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 
+import gy.sog.Juggler.BluetoothServer;
 import gy.sog.Juggler.JugglerService;
 
 public class Juggler extends Activity implements SensorListener
@@ -48,6 +57,7 @@ public class Juggler extends Activity implements SensorListener
     private final static String TAG = "Juggler";
 
     private TextView outView;
+    private SurfaceView sView;
     private Button btButton;
     private PopupWindow pw;
     private String server_address;
@@ -57,6 +67,26 @@ public class Juggler extends Activity implements SensorListener
     public static final String PREFS_NAME = "JugglerSettings";
     protected Dialog mSplashDialog;
     protected MediaPlayer mediaPlayer;
+
+    private JugglerService jugglerService = null;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                jugglerService = ((JugglerService.JSBinder)service).getService();
+                if (jugglerService != null) {
+                    if (sView != null) {
+                        sView.getHolder().addCallback(jugglerService);
+                    } else {
+                        Log.d(TAG, "onServiceConnected has jugglerService, but sView is null");
+                    }
+                } else {
+                    Log.d(TAG, "onServiceConnected jugglerService is still null");
+                }
+            }
+            public void onServiceDisconnected(ComponentName className) {
+                jugglerService = null;
+            }
+        };
+
 
     public static boolean is_emulating() {
         return "sdk".equals(Build.PRODUCT);
@@ -153,6 +183,11 @@ public class Juggler extends Activity implements SensorListener
         outView = (TextView)findViewById(R.id.output);
         outView.setText(String.format("hello world... from CODE %f", 2.0f));
         
+        sView = (SurfaceView)findViewById(R.id.surface_view);
+        if (sView == null) {
+            Log.d(TAG, "ARRRG, no surface view");
+        }
+
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         server_address = settings.getString("server_address", "192.168.1.113");
@@ -162,7 +197,11 @@ public class Juggler extends Activity implements SensorListener
     @Override
     protected void onStart() {
 	Log.d(TAG, "onStart");
-	startService(new Intent(this, JugglerService.class));
+
+	//startService(new Intent(this, JugglerService.class));
+        Intent bindIntent = new Intent(Juggler.this, JugglerService.class);
+        bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
 	super.onStart();
 	//registerSensorListeners();
     }
@@ -170,7 +209,8 @@ public class Juggler extends Activity implements SensorListener
     @Override
     protected void onStop() {
 	Log.d(TAG, "onStop");
-	stopService(new Intent(this, JugglerService.class));
+	//stopService(new Intent(this, JugglerService.class));
+        unbindService(serviceConnection);
 
 	super.onStop();
 	//unregisterSensorListeners();
