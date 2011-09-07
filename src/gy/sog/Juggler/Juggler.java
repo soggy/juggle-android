@@ -164,7 +164,7 @@ public class Juggler extends Activity implements SensorListener
 	Log.d(TAG, "onStart");
 	startService(new Intent(this, JugglerService.class));
 	super.onStart();
-	registerSensorListeners();
+	//registerSensorListeners();
     }
 
     @Override
@@ -173,7 +173,7 @@ public class Juggler extends Activity implements SensorListener
 	stopService(new Intent(this, JugglerService.class));
 
 	super.onStop();
-	unregisterSensorListeners();
+	//unregisterSensorListeners();
 
       // We need an Editor object to make preference changes.
       // All objects are from android.context.Context
