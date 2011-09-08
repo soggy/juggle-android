@@ -81,6 +81,7 @@ public class JugglerService extends Service
     public void onSensorChanged(int sensor, float[] values) {
 	//Log.d(TAG, String.format("onSensorChanged sensor:%d values:%s", sensor, values.toString()));
         hand.updateSensorData(sensor, 0.0f, values);
+	//sendAccelData(sensor, values);
 
         if (surfaceHolder != null) { // avoid locking every time if null, even though...
             surfaceHolderLock.lock();
@@ -130,4 +131,26 @@ public class JugglerService extends Service
         }
     }
 
+    //
+    // Non-Interface implementation code:
+    //
+    /*
+    protected void sendAccelData(int sensor, float[] values) {
+	// String server, int port, String msgStr) {
+	try {
+	    DatagramSocket s = new DatagramSocket();
+	    InetAddress saddr = InetAddress.getByName(server);
+	    int msg_length=msgStr.length();
+	    byte[] message = msgStr.getBytes();
+	    DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
+	    s.send(p);
+	} catch (SocketException e) {
+	    Log.d("sendAccelData", "SocketException: " + e);
+	} catch (UnknownHostException e) {
+	    Log.d("sendAccelData", "HostException: " + e);
+	} catch (java.io.IOException e) {
+	    Log.d("sendAccelData", "IOException: " + e);
+	}
+    }
+    */
 }

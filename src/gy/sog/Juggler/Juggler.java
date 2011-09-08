@@ -21,6 +21,8 @@ import android.os.IBinder;
 
 import android.util.Log;
 
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,6 +38,7 @@ import android.content.Intent;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Button;
@@ -56,7 +59,7 @@ public class Juggler extends Activity implements SensorListener
 {
     private final static String TAG = "Juggler";
 
-    private TextView outView;
+    private ImageView ballImage;
     private SurfaceView sView;
     private Button btButton;
     private PopupWindow pw;
@@ -66,6 +69,7 @@ public class Juggler extends Activity implements SensorListener
     private EditText server_port_input;
     public static final String PREFS_NAME = "JugglerSettings";
     protected Dialog mSplashDialog;
+    protected Animation throwAnim, catchAnim;
     protected MediaPlayer mediaPlayer;
 
     private JugglerService jugglerService = null;
@@ -116,26 +120,50 @@ public class Juggler extends Activity implements SensorListener
 	Log.d(TAG, "doThrow");
     	mediaPlayer = MediaPlayer.create(this, R.raw.throw_ball);
     	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
             public void onCompletion(MediaPlayer mp) {
             	mp.release();
             	mp = null;
             }
         });
+
+	/*
+	throwAnim.setAnimationListener(new Animation.AnimationListener() {
+		public void onAnimationEnd(Animation anim) {
+		    //ballImage.setAlpha(0);
+		}
+		public void onAnimationRepeat(Animation anim) {}
+		public void onAnimationStart(Animation anim) {}
+	    });
+	*/
+
+	ballImage.startAnimation(throwAnim);
     	mediaPlayer.start(); // no need to call prepare(); create() does that for you
     }
     
     public void doCatch(View button) {
 	Log.d(TAG, "doCatch");
+
+	//Animation catchAnim = AnimationUtils.loadAnimation(this, R.anim.catch_anim);
+
     	mediaPlayer = MediaPlayer.create(this, R.raw.catch_ball1);
     	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
             public void onCompletion(MediaPlayer mp) {
             	mp.release();
             	mp = null;
             }
         });
-    	mediaPlayer.start(); // no need to call prepare(); create() does that for you
+
+	catchAnim.setAnimationListener(new Animation.AnimationListener() {
+		public void onAnimationEnd(Animation anim) {
+		    //ballImage.setAlpha(0xff);
+		    mediaPlayer.start(); // no need to call prepare(); create() does that for you
+		}
+		public void onAnimationRepeat(Animation anim) {}
+		public void onAnimationStart(Animation anim) {
+		}
+	    });
+
+	ballImage.startAnimation(catchAnim);
     }
 
     private void registerSensorListeners() {
@@ -180,10 +208,14 @@ public class Juggler extends Activity implements SensorListener
         }
         //setContentView(R.layout.main);
         
-        outView = (TextView)findViewById(R.id.output);
-        outView.setText(String.format("hello world... from CODE %f", 2.0f));
+        //outView = (TextView)findViewById(R.id.output);
+        //outView.setText(String.format("hello world... from CODE %f", 2.0f));
         
-        sView = (SurfaceView)findViewById(R.id.surface_view);
+	ballImage = (ImageView)findViewById(R.id.jugglingball_view);
+	throwAnim = AnimationUtils.loadAnimation(this, R.anim.throw_anim);
+	catchAnim = AnimationUtils.loadAnimation(this, R.anim.catch_anim);
+
+        //sView = (SurfaceView)findViewById(R.id.surface_view);
         if (sView == null) {
             Log.d(TAG, "ARRRG, no surface view");
         }
@@ -317,7 +349,7 @@ public class Juggler extends Activity implements SensorListener
                 jEvent.put("data", jData);
 
                 String data = jEvent.toString();
-                outView.setText(data);
+                //outView.setText(data);
                 sendAccelData(server_address, (Integer.parseInt(server_port)), data);
             } catch (JSONException e) {
                 Log.d("sendAccelData", "JSONException: " + e);
@@ -381,7 +413,7 @@ public class Juggler extends Activity implements SensorListener
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
         setContentView(R.layout.main);
-        outView = (TextView)findViewById(R.id.output);
+        //outView = (TextView)findViewById(R.id.output);
     }
     
     public void serverBack(View button){    
@@ -406,7 +438,7 @@ public class Juggler extends Activity implements SensorListener
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(server_address_input.getWindowToken(), 0);
         setContentView(R.layout.main);
-        outView = (TextView)findViewById(R.id.output);
+        //outView = (TextView)findViewById(R.id.output);
     }
     
     public String getLocalIpAddress() {

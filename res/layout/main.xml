@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/main">
+<!-- 
 <TextView  
     android:id="@+id/output"
     android:layout_width="fill_parent" 
@@ -12,10 +13,20 @@
     />
 <SurfaceView
    android:id="@+id/surface_view"
-   android:layout_width="fill_parent"
+   android:layout_width="wrap_content"
    android:layout_height="wrap_content"
    android:text="SurfaceView"
-   />
+   /> 
+-->
+<ImageView
+    android:id="@+id/jugglingball_view"
+    android:src="@drawable/jugglingball"
+    android:adjustViewBounds="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="jugglingballview"
+    />
+<!--
 <Button
 	android:id="@+id/find_server"
 	android:layout_height="wrap_content"
@@ -29,10 +40,11 @@
 	android:text="Choose Sound"
 	android:onClick="pickSound"
 	android:layout_marginTop="50px" />
+-->
 <TableLayout  
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:paddingTop="150px">
+	android:paddingTop="10px">
 	<TableRow>
 	<Button
 		android:id="@+id/left_hand"
