@@ -1,7 +1,7 @@
 package gy.sog.Juggler;
 
 import java.lang.Exception;
-import java.net.*;
+//import java.net.*;
 import java.util.Enumeration;
 
 import android.app.Activity;
@@ -26,13 +26,15 @@ import android.view.animation.AnimationUtils;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.SurfaceView;
 
-import android.hardware.SensorListener;
-import android.hardware.SensorManager;
+//import android.hardware.SensorListener;
+//import android.hardware.SensorManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 
@@ -44,9 +46,9 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.view.View;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+//import org.json.JSONArray;
+//import org.json.JSONException;
+//import org.json.JSONObject;
 
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -55,7 +57,7 @@ import android.content.res.Configuration;
 import gy.sog.Juggler.BluetoothServer;
 import gy.sog.Juggler.JugglerService;
 
-public class Juggler extends Activity implements SensorListener
+public class Juggler extends Activity //implements SensorListener
 {
     private final static String TAG = "Juggler";
 
@@ -166,6 +168,7 @@ public class Juggler extends Activity implements SensorListener
 	ballImage.startAnimation(catchAnim);
     }
 
+    /*
     private void registerSensorListeners() {
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
         boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_FASTEST);
@@ -185,6 +188,7 @@ public class Juggler extends Activity implements SensorListener
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 	sensorMgr.unregisterListener(this);
     }
+    */
 
     /** Called when the activity is first created. */
     @Override
@@ -269,7 +273,16 @@ public class Juggler extends Activity implements SensorListener
         }
         return data;
     }
-    
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+	super.onCreateOptionsMenu(menu);
+	MenuItem mItem = menu.add(0, Menu.FIRST, Menu.NONE, "Prefs");
+
+	mItem.setIntent(new Intent(this, JugglerPreferenceActivity.class));
+
+	return true;
+    }
      
     /**
      * Removes the Dialog that displays the splash screen
@@ -321,6 +334,7 @@ public class Juggler extends Activity implements SensorListener
   
     private float[] last_orientation_data = null;
 
+    /*
     public void onSensorChanged(int sensor, float[] values) {
         if (last_orientation_data == null) {
             last_orientation_data = new float[3];
@@ -350,7 +364,7 @@ public class Juggler extends Activity implements SensorListener
 
                 String data = jEvent.toString();
                 //outView.setText(data);
-                sendAccelData(server_address, (Integer.parseInt(server_port)), data);
+                //sendAccelData(server_address, (Integer.parseInt(server_port)), data);
             } catch (JSONException e) {
                 Log.d("sendAccelData", "JSONException: " + e);
             }
@@ -369,8 +383,9 @@ public class Juggler extends Activity implements SensorListener
         default: break;
         }
     }
+    */
 
-
+    /*
     public void sendAccelData(String server, int port, String msgStr) {
     try {
         DatagramSocket s = new DatagramSocket();
@@ -403,7 +418,8 @@ public class Juggler extends Activity implements SensorListener
         my_ip.setText(getLocalIpAddress());
         
     }
-    
+    */
+
     public void serverConnect(View button){
 
         server_address=server_address_input.getText().toString();
@@ -440,7 +456,8 @@ public class Juggler extends Activity implements SensorListener
         setContentView(R.layout.main);
         //outView = (TextView)findViewById(R.id.output);
     }
-    
+
+    /*
     public String getLocalIpAddress() {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
@@ -458,7 +475,8 @@ public class Juggler extends Activity implements SensorListener
         }
         return null;
     }
-    
+    */
+
     public void pickSound(View button){
         Intent intent = new Intent(this, SoundFXChooser.class);
         startActivity(intent);

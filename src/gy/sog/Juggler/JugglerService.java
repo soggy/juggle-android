@@ -1,10 +1,17 @@
 package gy.sog.Juggler;
 
+import java.net.*;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Service;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
@@ -12,19 +19,27 @@ import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
 
+import android.preference.PreferenceManager;
+
 import android.util.Log;
 
 import android.view.SurfaceHolder;
 
 
 public class JugglerService extends Service 
-    implements SensorListener, SurfaceHolder.Callback
+    implements SensorListener, SurfaceHolder.Callback, 
+	       SharedPreferences.OnSharedPreferenceChangeListener
 {
     private final static String TAG = "JugglerService";
     private Hand hand = new Hand(200);
 
     private ReentrantLock surfaceHolderLock = new ReentrantLock();
     private SurfaceHolder surfaceHolder = null;
+
+    // set from shared prefs
+    private boolean sendSensorData = false;
+    private String serverAddr = "";
+    private int serverPort = 0;
 
     @Override
     public void onCreate() {
@@ -42,6 +57,8 @@ public class JugglerService extends Service
         }
         
         boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_FASTEST);        
+
+	loadSharedPrefs();
     }
 
     @Override
@@ -81,13 +98,14 @@ public class JugglerService extends Service
     public void onSensorChanged(int sensor, float[] values) {
 	//Log.d(TAG, String.format("onSensorChanged sensor:%d values:%s", sensor, values.toString()));
         hand.updateSensorData(sensor, 0.0f, values);
-	//sendAccelData(sensor, values);
+	sendAccelData(sensor, values);
 
         if (surfaceHolder != null) { // avoid locking every time if null, even though...
             surfaceHolderLock.lock();
             try {
                 if (surfaceHolder != null) { // ... we still have to check once the lock is aquired
                     //Log.d(TAG, String.format("onSensorChanged rendering %d %s to %s", sensor, values.toString(), surfaceHolder.toString()));
+		    //FIX: need to actually draw on something here (meaning, need to make the Activity contain a SurfaceHolder which gets the ball+sensor data rendered to it.
                 }
             } finally {
                 surfaceHolderLock.unlock();
@@ -131,15 +149,42 @@ public class JugglerService extends Service
         }
     }
 
+
+    //
+    // OnSharedPreferenceChangeListener interface impl
+    //
+    @Override 
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+	Log.d(TAG, String.format("onSharedPreferenceChanged for key %s", key));
+    }
+
+
     //
     // Non-Interface implementation code:
     //
-    /*
+
+    protected void loadSharedPrefs() {
+	Context context = getApplicationContext();
+	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+	Log.d(TAG, String.format("loadSharedPrefs found %s", prefs.toString()));
+	sendSensorData = prefs.getBoolean(JugglerPreferenceActivity.PREF_SERVER_SEND_DATA, false);
+	serverAddr = prefs.getString(JugglerPreferenceActivity.PREF_SERVER_IP, "localhost");
+	serverPort = Integer.parseInt(prefs.getString(JugglerPreferenceActivity.PREF_SERVER_PORT, "12345"));
+    }
+
     protected void sendAccelData(int sensor, float[] values) {
 	// String server, int port, String msgStr) {
+	String msgStr = formatSensorMessage(sensor, values);
+	if (msgStr == null) {
+	    Log.d(TAG, String.format("sendAccelData failed to format the sensor message sensor:%d values:%s", 
+				     sensor, values.toString()));
+	    return;
+	}
+
 	try {
 	    DatagramSocket s = new DatagramSocket();
-	    InetAddress saddr = InetAddress.getByName(server);
+	    InetAddress saddr = InetAddress.getByName("192.168.1.10"); //server);
+	    int port = 12345;
 	    int msg_length=msgStr.length();
 	    byte[] message = msgStr.getBytes();
 	    DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
@@ -152,5 +197,27 @@ public class JugglerService extends Service
 	    Log.d("sendAccelData", "IOException: " + e);
 	}
     }
-    */
+
+    protected String formatSensorMessage(int sensor, float[] values) {
+	try {
+	    JSONObject jEvent = new JSONObject();
+	    JSONObject jData = new JSONObject();
+	    jData.put("hand", "right");
+	    jData.put("x", values[0]);
+	    jData.put("y", values[1]);
+	    jData.put("z", values[2]);
+	    jData.put("azimuth", 0.0); //last_orientation_data[0]);
+	    jData.put("pitch", 0.0); //last_orientation_data[1]);
+	    jData.put("roll", 0.0); //last_orientation_data[2]);
+	    jEvent.put("type", "sensor_data");
+	    jEvent.put("data", jData);
+	    
+	    String data = jEvent.toString();
+	    return data;
+	} catch (JSONException e) {
+	    Log.d(TAG, "formatSensorMessage JSONException: " + e);
+	}
+	return null;
+    }
+
 }

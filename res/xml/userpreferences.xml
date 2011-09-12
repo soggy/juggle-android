@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+  <CheckBoxPreference
+      android:key="PREF_SEND_DATA"
+      android:title="Send sensor data to server"
+      android:summary="Check to enable sending sensor data to server"
+      android:defaultValue="false"
+      />
+  <EditTextPreference 
+      android:key="PREF_SERVER_IP"
+      android:title="Server IP"
+      android:summary="IP address of the server to send sensor data to"
+      android:defaultValue="192.168.1.20"
+      />
+  <EditTextPreference
+      android:key="PREF_SERVER_PORT"
+      android:title="Server Port"
+      android:summary="IP port on server to send sensor data to"
+      android:defaultValue="12345"
+      />
+</PreferenceScreen>
