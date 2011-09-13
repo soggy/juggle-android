@@ -58,7 +58,10 @@ public class JugglerService extends Service
         
         boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_FASTEST);        
 
-	loadSharedPrefs();
+	Context context = getApplicationContext();
+	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+	prefs.registerOnSharedPreferenceChangeListener(this);
+	loadSharedPrefs(prefs);
     }
 
     @Override
@@ -86,6 +89,10 @@ public class JugglerService extends Service
         Log.d(TAG, "onDestroy");
         SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 	sensorMgr.unregisterListener(this);
+
+	Context context = getApplicationContext();
+	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+	prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     /// SensorListener interface
@@ -94,11 +101,32 @@ public class JugglerService extends Service
 	//Log.d(TAG, String.format("onAccuracyChanged sensor:%d accuracy:%d", sensor, accuracy));
     }
 
+    private float[] last_orientation_data = null;
+
     @Override
     public void onSensorChanged(int sensor, float[] values) {
 	//Log.d(TAG, String.format("onSensorChanged sensor:%d values:%s", sensor, values.toString()));
+
+	// FIX: need to get message from hand?
+        if (last_orientation_data == null) {
+            last_orientation_data = new float[3];
+            last_orientation_data[0] = 0.0f;
+            last_orientation_data[1] = 0.0f;
+            last_orientation_data[2] = 0.0f;
+        }
+	if (sensor == SensorManager.SENSOR_ORIENTATION) {
+            // All values are angles in degrees.
+            // values[0]: Azimuth, rotation around the Z axis (0<=azimuth<360). 0 = North, 90 = East, 180 = South, 270 = West
+            // values[1]: Pitch, rotation around X axis (-180<=pitch<=180), with positive values when the z-axis moves toward the y-axis.
+            // values[2]: Roll, rotation around Y axis (-90<=roll<=90), with positive values when the z-axis moves toward the x-axis.
+            last_orientation_data[0] = values[0];
+            last_orientation_data[1] = values[1];
+            last_orientation_data[2] = values[2];
+	}
+
         hand.updateSensorData(sensor, 0.0f, values);
-	sendAccelData(sensor, values);
+	if (sendSensorData && sensor == SensorManager.SENSOR_ACCELEROMETER)
+	    sendAccelData(sensor, values);
 
         if (surfaceHolder != null) { // avoid locking every time if null, even though...
             surfaceHolderLock.lock();
@@ -156,6 +184,7 @@ public class JugglerService extends Service
     @Override 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 	Log.d(TAG, String.format("onSharedPreferenceChanged for key %s", key));
+	loadSharedPrefs(prefs);
     }
 
 
@@ -163,13 +192,13 @@ public class JugglerService extends Service
     // Non-Interface implementation code:
     //
 
-    protected void loadSharedPrefs() {
-	Context context = getApplicationContext();
-	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-	Log.d(TAG, String.format("loadSharedPrefs found %s", prefs.toString()));
+    protected void loadSharedPrefs(SharedPreferences prefs) {
+	Log.d(TAG, String.format("loadSharedPrefs %s", prefs.toString()));
 	sendSensorData = prefs.getBoolean(JugglerPreferenceActivity.PREF_SERVER_SEND_DATA, false);
 	serverAddr = prefs.getString(JugglerPreferenceActivity.PREF_SERVER_IP, "localhost");
 	serverPort = Integer.parseInt(prefs.getString(JugglerPreferenceActivity.PREF_SERVER_PORT, "12345"));
+	Log.d(TAG, String.format("loadSharedPrefs done with sendSensorData:%s serverAddr:%s serverPort:%d",
+				 sendSensorData, serverAddr, serverPort));
     }
 
     protected void sendAccelData(int sensor, float[] values) {
@@ -183,8 +212,8 @@ public class JugglerService extends Service
 
 	try {
 	    DatagramSocket s = new DatagramSocket();
-	    InetAddress saddr = InetAddress.getByName("192.168.1.10"); //server);
-	    int port = 12345;
+	    InetAddress saddr = InetAddress.getByName(serverAddr);
+	    int port = serverPort;
 	    int msg_length=msgStr.length();
 	    byte[] message = msgStr.getBytes();
 	    DatagramPacket p = new DatagramPacket(message, msg_length,saddr,port);
@@ -206,9 +235,9 @@ public class JugglerService extends Service
 	    jData.put("x", values[0]);
 	    jData.put("y", values[1]);
 	    jData.put("z", values[2]);
-	    jData.put("azimuth", 0.0); //last_orientation_data[0]);
-	    jData.put("pitch", 0.0); //last_orientation_data[1]);
-	    jData.put("roll", 0.0); //last_orientation_data[2]);
+	    jData.put("azimuth", last_orientation_data[0]);
+	    jData.put("pitch", last_orientation_data[1]);
+	    jData.put("roll", last_orientation_data[2]);
 	    jEvent.put("type", "sensor_data");
 	    jEvent.put("data", jData);
 	    

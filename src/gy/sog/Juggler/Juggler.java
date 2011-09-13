@@ -33,8 +33,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.SurfaceView;
 
-//import android.hardware.SensorListener;
-//import android.hardware.SensorManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 
@@ -46,10 +44,6 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.view.View;
 
-//import org.json.JSONArray;
-//import org.json.JSONException;
-//import org.json.JSONObject;
-
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -57,7 +51,7 @@ import android.content.res.Configuration;
 import gy.sog.Juggler.BluetoothServer;
 import gy.sog.Juggler.JugglerService;
 
-public class Juggler extends Activity //implements SensorListener
+public class Juggler extends Activity
 {
     private final static String TAG = "Juggler";
 
@@ -128,24 +122,12 @@ public class Juggler extends Activity //implements SensorListener
             }
         });
 
-	/*
-	throwAnim.setAnimationListener(new Animation.AnimationListener() {
-		public void onAnimationEnd(Animation anim) {
-		    //ballImage.setAlpha(0);
-		}
-		public void onAnimationRepeat(Animation anim) {}
-		public void onAnimationStart(Animation anim) {}
-	    });
-	*/
-
 	ballImage.startAnimation(throwAnim);
     	mediaPlayer.start(); // no need to call prepare(); create() does that for you
     }
     
     public void doCatch(View button) {
 	Log.d(TAG, "doCatch");
-
-	//Animation catchAnim = AnimationUtils.loadAnimation(this, R.anim.catch_anim);
 
     	mediaPlayer = MediaPlayer.create(this, R.raw.catch_ball1);
     	mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -157,7 +139,6 @@ public class Juggler extends Activity //implements SensorListener
 
 	catchAnim.setAnimationListener(new Animation.AnimationListener() {
 		public void onAnimationEnd(Animation anim) {
-		    //ballImage.setAlpha(0xff);
 		    mediaPlayer.start(); // no need to call prepare(); create() does that for you
 		}
 		public void onAnimationRepeat(Animation anim) {}
@@ -167,28 +148,6 @@ public class Juggler extends Activity //implements SensorListener
 
 	ballImage.startAnimation(catchAnim);
     }
-
-    /*
-    private void registerSensorListeners() {
-        SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-        boolean accelSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_FASTEST);
-
-        if (! accelSupported) {
-            throw new Error("AARRGH (no accelerometer)");
-        }
-
-        boolean orientSupported = sensorMgr.registerListener(this, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_FASTEST);
-
-        //if (! orientSupported) {
-            //throw new Error("AARRGH (no orientation sensor)");
-        //}
-    }
-
-    private void unregisterSensorListeners() {
-        SensorManager sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-	sensorMgr.unregisterListener(this);
-    }
-    */
 
     /** Called when the activity is first created. */
     @Override
@@ -228,38 +187,40 @@ public class Juggler extends Activity //implements SensorListener
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         server_address = settings.getString("server_address", "192.168.1.113");
         server_port = settings.getString("server_port", "12345");
+
+        Intent bindIntent = new Intent(Juggler.this, JugglerService.class);
+        bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
     
     @Override
     protected void onStart() {
 	Log.d(TAG, "onStart");
-
-	//startService(new Intent(this, JugglerService.class));
-        Intent bindIntent = new Intent(Juggler.this, JugglerService.class);
-        bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-
 	super.onStart();
-	//registerSensorListeners();
     }
 
     @Override
     protected void onStop() {
 	Log.d(TAG, "onStop");
-	//stopService(new Intent(this, JugglerService.class));
-        unbindService(serviceConnection);
-
+        //unbindService(serviceConnection);
+	
 	super.onStop();
-	//unregisterSensorListeners();
+	
+	// We need an Editor object to make preference changes.
+	// All objects are from android.context.Context
+	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+	SharedPreferences.Editor editor = settings.edit();
+	editor.putString("server_address", server_address);
+	editor.putString("server_port", server_port);
+	
+	// Commit the edits!
+	editor.commit();
+    }
 
-      // We need an Editor object to make preference changes.
-      // All objects are from android.context.Context
-      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-      SharedPreferences.Editor editor = settings.edit();
-      editor.putString("server_address", server_address);
-      editor.putString("server_port", server_port);
-
-      // Commit the edits!
-      editor.commit();
+    @Override
+    protected void onDestroy() {
+	Log.d(TAG, "onDestroy");
+        unbindService(serviceConnection);
+	super.onDestroy();
     }
 
     @Override
@@ -278,7 +239,6 @@ public class Juggler extends Activity //implements SensorListener
     public boolean onCreateOptionsMenu(Menu menu) {
 	super.onCreateOptionsMenu(menu);
 	MenuItem mItem = menu.add(0, Menu.FIRST, Menu.NONE, "Prefs");
-
 	mItem.setIntent(new Intent(this, JugglerPreferenceActivity.class));
 
 	return true;
@@ -306,11 +266,11 @@ public class Juggler extends Activity //implements SensorListener
         // Set Runnable to remove splash screen just in case
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
-          //@Override
-          public void run() {
-            removeSplashScreen();
-          }
-        }, 3000);
+		//@Override
+		public void run() {
+		    removeSplashScreen();
+		}
+	    }, 3000);
     }
     
     /**
@@ -325,10 +285,6 @@ public class Juggler extends Activity //implements SensorListener
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-    }
-
-    public void onAccuracyChanged(int sensor, int accuracy) {
-        // outView.setText(String.format("onAccuracyChanged: sensor: %d, accuracy: %d", sensor, accuracy));
     }
 
   
